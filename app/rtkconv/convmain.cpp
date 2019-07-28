@@ -35,7 +35,7 @@
 
 TMainWindow *MainWindow;
 
-#define PRGNAME		"RTKCONV"  // program name
+#define PRGNAME		"JoytonObsConv"  // program name
 #define MAXHIST		20		   // max number of histories
 #define TSTARTMARGIN 60.0	   // time margin for file name replacement
 #define TRACEFILE	"rtkconv.trace" // trace file
@@ -77,6 +77,59 @@ __fastcall TMainWindow::TMainWindow(TComponent* Owner)
 	Format->Items->Add(formatstrs[STRFMT_RINEX]);
 	RnxTime=time0;
 	EventEna=0;
+
+		/*init the form add by Awesome*/
+	Format->ItemIndex = 2; /*RTCM 3*/
+	Format->Visible = 0;
+	LabelFormat->Visible = 0;
+
+	OutDirEna->Checked = 1;   /* out dict always valid */
+	OutDirEna->Visible = 0;   /* disvisable the out dir select */
+	OutFileEna1->Checked = 1; /* obs select -> Novatel */
+	OutFileEna2->Checked = 1; /* nav select -> RTCM V3 */
+
+	OutFileEna1->Visible = 0;
+	OutFileEna2->Visible = 0;
+	OutFileEna3->Checked = 0;
+	OutFileEna3->Visible = 0;
+	OutFileEna4->Checked = 0;
+	OutFileEna4->Visible = 0;
+	OutFileEna5->Checked = 0;
+	OutFileEna5->Visible = 0;
+	OutFileEna6->Checked = 0;
+	OutFileEna6->Visible = 0;
+	OutFileEna7->Checked = 0;
+	OutFileEna7->Visible = 0;
+	OutFileEna8->Checked = 0;
+	OutFileEna8->Visible = 0;
+	OutFileEna9->Checked = 0;
+	OutFileEna9->Visible = 0;
+
+	OutFile3->Visible = 0;
+	OutFile4->Visible = 0;
+	OutFile5->Visible = 0;
+	OutFile6->Visible = 0;
+	OutFile7->Visible = 0;
+	OutFile8->Visible = 0;
+	OutFile9->Visible = 0;
+
+	BtnOutFileView3->Visible = 0;
+	BtnOutFileView4->Visible = 0;
+	BtnOutFileView5->Visible = 0;
+	BtnOutFileView6->Visible = 0;
+	BtnOutFileView7->Visible = 0;
+	BtnOutFileView8->Visible = 0;
+	BtnOutFileView9->Visible = 0;
+
+	BtnOutFile3->Visible = 0;
+	BtnOutFile4->Visible = 0;
+	BtnOutFile5->Visible = 0;
+	BtnOutFile6->Visible = 0;
+	BtnOutFile7->Visible = 0;
+	BtnOutFile8->Visible = 0;
+	BtnOutFile9->Visible = 0;
+
+	/*end add by Awesome*/
 }
 // callback on form create --------------------------------------------------
 void __fastcall TMainWindow::FormCreate(TObject *Sender)
@@ -131,13 +184,28 @@ void __fastcall TMainWindow::SetOutFiles(AnsiString infile)
 	};
 	AnsiString Format_Text=Format->Text;
 	AnsiString OutDir_Text=OutDir->Text;
-	char *ifile,ofile[10][1024],*code,*p;
+	char *ifile,ofile[10][1024],*code,*p,*q;
+	char dirFile[100];
 	int i,lex=strstr(Format_Text.c_str(),"LEX")!=NULL;
 	
 	if (!EventEna) return;
 	
 	ifile=infile.c_str();
+	q = ifile;
 	if (OutDirEna->Checked) {
+		if( (p=strrchr(ifile, '\\') ) )
+		{   int t = 0;
+			while(q!=p)
+			{
+			   dirFile[t] = *q;
+			   ++q;
+			   ++t;
+			}
+			dirFile[t] = '\0';
+			OutDir->Text = dirFile;
+			OutDir_Text = OutDir->Text;
+		}else OutDir->Text=infile;
+
 		if ((p=strrchr(ifile,'\\'))) p++; else p=ifile;
 		sprintf(ofile[0],"%s\\%s",OutDir_Text.c_str(),p);
 	}
@@ -300,7 +368,42 @@ void __fastcall TMainWindow::BtnAbortClick(TObject *Sender)
 // callback on button-convert -----------------------------------------------
 void __fastcall TMainWindow::BtnConvertClick(TObject *Sender)
 {
+	if(""==InFile->Text)
+	{
+		showmsg("Error: None Raw Data File!");
+		return;
+	}
+	/* RTCM 3 convert nav data */
+	OutDirEna->Checked = 1;
+	OutFileEna1->Checked = 0;  /* no obs */
+	OutFileEna2->Checked = 1;  /* RTCM3 to nav */
+	Format->ItemIndex = 2;     /* select file is RTCM 3 */
 	ConvertFile();
+
+	/* Novatel OEM6 data convert obs data */
+	OutDirEna->Checked = 1;
+	OutFileEna1->Checked = 1;  /* have obs */
+	OutFileEna2->Checked = 0;  /* no RTCM3 */
+	Format->ItemIndex = 3;     /* select file is Novatel */
+	ConvertFile();
+
+    OutFileEna1->Checked = 1;  /* have obs */
+	OutFileEna2->Checked = 1;  /* no RTCM3 */
+
+    PROCESS_INFORMATION info;
+	STARTUPINFO si={0};
+	si.cb=sizeof(si);
+	AnsiString cmd = "";
+	cmd = cmd + ".\\rtklib_event_process.exe" + " " + InFile->Text +" " + OutFile1->Text;
+	if (!CreateProcess(NULL,cmd.c_str(),NULL,NULL,false,0,NULL,NULL,&si,&info))
+	{
+		showmsg("Error: none event process app!");
+		return;
+	}
+	showmsg(">>> Mark Event Process");
+	CloseHandle(info.hProcess);
+	CloseHandle(info.hThread);
+
 }
 // callback on button-exit --------------------------------------------------
 void __fastcall TMainWindow::BtnExitClick(TObject *Sender)
@@ -894,7 +997,7 @@ void __fastcall TMainWindow::ConvertFile(void)
 	p=rnxopt.comment[0];
 	sprintf(p,"log: %-53.53s",file);
 	p=rnxopt.comment[1];
-	p+=sprintf(p,"format: %s",formatstrs[format]);
+	p+=sprintf(p,"format: %s","Joyton GNSS Raw Data"/*formatstrs[format]*/);
 	if (*rnxopt.rcvopt) sprintf(p,", option: %s",rnxopt.rcvopt);
 	for (i=0;i<2;i++) strncpy(rnxopt.comment[i+2],Comment[i].c_str(),63);
 	for (i=0;i<7;i++) strcpy(rnxopt.mask[i],CodeMask[i].c_str());
@@ -1035,6 +1138,7 @@ void __fastcall TMainWindow::LoadOpt(void)
 	TimeInt    ->Text	=ini->ReadString ("set","timeint",	 "1");
 	TimeUnitF  ->Checked=ini->ReadInteger("set","timeunitf",   0);
 	TimeUnit   ->Text	=ini->ReadString ("set","timeunit", "24");
+	/*
 	InFile	   ->Text	=ini->ReadString ("set","infile",	  "");
 	OutDir	   ->Text	=ini->ReadString ("set","outdir",	  "");
 	OutFile1   ->Text	=ini->ReadString ("set","outfile1",   "");
@@ -1057,6 +1161,7 @@ void __fastcall TMainWindow::LoadOpt(void)
 	OutFileEna8->Checked=ini->ReadInteger("set","outfileena8", 1);
 	OutFileEna9->Checked=ini->ReadInteger("set","outfileena9", 1);
 	Format	 ->ItemIndex=ini->ReadInteger("set","format",	   0);
+	*/
 	
 	InFile->Items=ReadList(ini,"hist","inputfile");
 	
