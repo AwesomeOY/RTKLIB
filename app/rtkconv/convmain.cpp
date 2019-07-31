@@ -61,7 +61,7 @@ __fastcall TMainWindow::TMainWindow(TComponent* Owner)
 {
 	gtime_t time0={0};
 	int i;
-	char file[1024]="rtkconv.exe",*p;
+	char file[1024]="JoytonObsConv.exe",*p;
 	
 	::GetModuleFileName(NULL,file,sizeof(file));
 	if (!(p=strrchr(file,'.'))) p=file+strlen(file);
