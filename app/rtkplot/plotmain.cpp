@@ -1115,7 +1115,7 @@ void __fastcall TPlot::MenuAboutClick(TObject *Sender)
     trace(3,"MenuAboutClick\n");
     
     AboutDialog->About=PRGNAME;
-    AboutDialog->IconIndex=2;
+	AboutDialog->IconIndex=2;
     AboutDialog->ShowModal();
 }
 // callback on button-connect/disconnect ------------------------------------

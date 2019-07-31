@@ -26,7 +26,7 @@
 #define MAXMAPPATH  4096                // max number of map paths
 #define MAXMAPLAYER 12                  // max number of map layers
 
-#define PRGNAME     "RTKPLOT"           // program name
+#define PRGNAME     "JoytonViewer"           // program name
 
 #define CHARDEG     "\302\260"          // character code of degree (UTF-8)
 #define CHARUP2     "\302\262"          // character code of ^2     (UTF-8)

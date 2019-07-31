@@ -51,7 +51,7 @@
 
 TMainForm *MainForm;
 
-#define PRGNAME     "RTKPOST"
+#define PRGNAME     "JoytonPost"
 #define MAXHIST     20
 #define GOOGLE_EARTH "C:\\Program Files\\Google\\Google Earth\\googleearth.exe"
 

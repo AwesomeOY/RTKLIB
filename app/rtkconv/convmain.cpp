@@ -326,7 +326,7 @@ void __fastcall TMainWindow::BtnPlotClick(TObject *Sender)
 	AnsiString file7=OutFile7->Text;
 	AnsiString file8=OutFile8->Text;
 	AnsiString file[]={file1,file2,file3,file4,file5,file6,file7,file8};
-	AnsiString cmd1="rtkplot",cmd2="..\\..\\..\\bin\\rtkplot",opts=" -r";
+	AnsiString cmd1="JoytonViewer",cmd2="..\\..\\..\\bin\\JoytonViewer",opts=" -r";
 	TCheckBox *cb[]={
 		OutFileEna1,OutFileEna2,OutFileEna3,OutFileEna4,OutFileEna5,OutFileEna6,
 		OutFileEna7,OutFileEna8
@@ -341,7 +341,7 @@ void __fastcall TMainWindow::BtnPlotClick(TObject *Sender)
 	if (opts==" -r") return;
 	
 	if (!ExecCmd(cmd1+opts)&&!ExecCmd(cmd2+opts)) {
-		Message->Caption="error : rtkplot execution";
+		Message->Caption="error : JoytonViewer execution";
 	}
 }
 // callback on button-post-proc ---------------------------------------------
