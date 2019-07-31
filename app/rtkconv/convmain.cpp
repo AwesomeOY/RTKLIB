@@ -39,6 +39,7 @@ TMainWindow *MainWindow;
 #define MAXHIST		20		   // max number of histories
 #define TSTARTMARGIN 60.0	   // time margin for file name replacement
 #define TRACEFILE	"rtkconv.trace" // trace file
+#define CHAR_IS_NUM(c) (c>='0' && c<='9')
 
 static int abortf=0;
 
@@ -54,6 +55,22 @@ extern int showmsg(char *format,...)
 	if (++i%100==0) Application->ProcessMessages();
 	return abortf;
 }
+
+static int str_to_num(char* pc, int len)
+{
+	int sum = 0;
+	int i = 0;
+	for(i=0; i<len; ++i)
+	{
+		if(CHAR_IS_NUM(*pc))
+		{
+			sum = sum*10 + (*pc-'0');
+			++pc;
+		}else return -1;		
+	}
+	return sum;
+}
+
 }
 // constructor --------------------------------------------------------------
 __fastcall TMainWindow::TMainWindow(TComponent* Owner)
@@ -431,11 +448,32 @@ void __fastcall TMainWindow::BtnTime2Click(TObject *Sender)
 // callback on button-input-file --------------------------------------------
 void __fastcall TMainWindow::BtnInFileClick(TObject *Sender)
 {
-	OpenDialog->Title="Input RTCM, RCV RAW or RINEX OBS File";
+	char* file;
+	char* p;
+	OpenDialog->Title="Input Joyton GNSS Raw Data joy/bin/log";
 	OpenDialog->FileName="";
 	if (!OpenDialog->Execute()) return;
-	InFile->Text=OpenDialog->FileName;
-	SetOutFiles(InFile->Text);
+	AnsiString str = OpenDialog->FileName;
+	file = str.c_str();
+	if(p=strrchr(file,'.'))
+	{
+	  p = p+1;
+	  if(!strcmp("joy",p)||!strcmp("log",p)||!strcmp("bin", p)||\
+	  !strcmp("Joy",p)||!strcmp("Log",p)||!strcmp("Bin", p)||\
+	  !strcmp("JOY",p)||!strcmp("LOG",p)||!strcmp("BIN", p))
+	  {
+		InFile->Text=OpenDialog->FileName;
+		SetOutFiles(InFile->Text);
+		showmsg("Format: %s",p);
+	  }else
+	  {
+		InFile->Text = "";
+		OutDir->Text = "";
+		OutFile1->Text = "";
+		OutFile2->Text = "";
+		showmsg("Input File Error!(joy/log/bin)");
+	  }
+	}
 }
 // callback on output-directory change --------------------------------------
 void __fastcall TMainWindow::OutDirChange(TObject *Sender)
@@ -954,10 +992,46 @@ void __fastcall TMainWindow::ConvertFile(void)
 	if (format==STRFMT_RTCM2||format==STRFMT_RTCM3||format==STRFMT_RT17||
 		format==STRFMT_CMR) {
 		
-		// input start date/time for rtcm 2, rtcm 3, RT17 or CMR
-		StartDialog->FileName=file;
-		if (StartDialog->ShowModal()!=mrOk) return;
-		rnxopt.trtcm=StartDialog->Time;
+		/* from file name get the time */
+		double date[6] = {0};  /* file date time year, month, day, hour */
+		char* infile;
+		char error = 0;
+		char* q;
+		char i = 0;
+		AnsiString InFile_Text=InFile->Text;
+		infile = InFile_Text.c_str();
+		if(p=strrchr(infile, '\\'))
+		{
+			/* R-2019-07-31-02-16_00010 */
+		    q = p+3; /* year start pos */
+			date[0] = str_to_num( q , 4);
+			q = p+8;
+			date[1] = str_to_num( q, 2);
+			q = p+11;
+			date[2] = str_to_num( q, 2 );
+			q = p+14;
+			date[3] = str_to_num( q, 2);
+			if( -1==date[0] || -1==date[1] || -1==date[2] || -1==date[3] ) error = 1;
+			else
+			{
+				date[4] = date[5] = 0.0;
+				rnxopt.trtcm = epoch2time(date);
+				showmsg("%.0f,%.0f,%.0f,%.0f", date[0],date[1],date[2],date[3]);
+			}
+		}else
+		{
+			error = 1;
+		}
+		if(error)
+		{
+			// input start date/time for rtcm 2, rtcm 3, RT17 or CMR
+			StartDialog->FileName=file;
+			if (StartDialog->ShowModal()!=mrOk) return;
+			rnxopt.trtcm=StartDialog->Time;
+		}
+		
+
+		
 	}
 	if (OutFile1->Enabled&&OutFileEna1->Checked) strcpy(ofile[0],OutFile1_Text.c_str());
 	if (OutFile2->Enabled&&OutFileEna2->Checked) strcpy(ofile[1],OutFile2_Text.c_str());
