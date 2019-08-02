@@ -243,7 +243,7 @@ void __fastcall TMainForm::BtnPlotClick(TObject *Sender)
 {
     AnsiString OutputFile_Text=OutputFile->Text;
     AnsiString file=FilePath(OutputFile_Text);
-    AnsiString cmd1="rtkplot",cmd2="..\\..\\..\\bin\\rtkplot",opts="";
+    AnsiString cmd1="JoytonViewer",cmd2="..\\..\\..\\bin\\JoytonViewer",opts="";
     
     opts+=" \""+file+"\"";
     

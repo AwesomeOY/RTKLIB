@@ -8,7 +8,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<ProjectVersion>18.2</ProjectVersion>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
-			<TargetedPlatforms>1</TargetedPlatforms>
+			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Application</AppType>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -95,6 +95,10 @@
 			<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win64)'!=''">
+			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<VerInfo_Locale>1033</VerInfo_Locale>
 			<TASM_Defines>_RTLDLL;WIN32;TRACE;ENAGLO;ENAQZS;ENAGAL;NFREQ=3;$(TASM_Defines)</TASM_Defines>
 			<BRCC_Defines>_RTLDLL;WIN32;TRACE;ENAGLO;ENAQZS;ENAGAL;NFREQ=3;$(BRCC_Defines)</BRCC_Defines>
 			<BCC_Defines>_RTLDLL;WIN32;TRACE;ENAGLO;ENAQZS;ENAGAL;ENACMP;NFREQ=3;$(BCC_Defines)</BCC_Defines>
@@ -466,7 +470,7 @@
 					</Source>
 				</CPlusPlusBuilder.Personality>
 				<Platforms>
-					<Platform value="Win64">False</Platform>
+					<Platform value="Win64">True</Platform>
 					<Platform value="Win32">True</Platform>
 				</Platforms>
 				<Deployment Version="3">
@@ -475,18 +479,18 @@
 							<RemoteDir>.\</RemoteDir>
 						</Platform>
 					</DeployFile>
-					<DeployFile Class="DependencyModule" Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin\borlndmm.dll">
-						<Platform Name="Win32"/>
+					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="rtkpost.res">
+						<Platform Name="Win32">
+							<RemoteDir>.\</RemoteDir>
+						</Platform>
 					</DeployFile>
 					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="..\..\src\ppp_ar.c">
 						<Platform Name="Win32">
 							<RemoteDir>.\</RemoteDir>
 						</Platform>
 					</DeployFile>
-					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="rtkpost.res">
-						<Platform Name="Win32">
-							<RemoteDir>.\</RemoteDir>
-						</Platform>
+					<DeployFile Class="DependencyModule" Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin\borlndmm.dll">
+						<Platform Name="Win32"/>
 					</DeployFile>
 					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="..\..\src\rcvraw.c">
 						<Platform Name="Win32">
@@ -579,14 +583,10 @@
 					<DeployFile Class="DependencyModule" Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx32\libcgcrtl.dylib">
 						<Platform Name="OSX32"/>
 					</DeployFile>
-					<DeployFile Class="DependencyModule" Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin64\borlndmm.dll">
-						<Platform Name="Win64"/>
-					</DeployFile>
-					<DeployFile Class="DependencyModule" Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c240.dll">
-						<Platform Name="Win32"/>
-					</DeployFile>
-					<DeployFile Class="DependencyModule" Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64240mt.dll">
-						<Platform Name="Win64"/>
+					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="..\..\src\geoid.c">
+						<Platform Name="Win32">
+							<RemoteDir>.\</RemoteDir>
+						</Platform>
 					</DeployFile>
 					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="..\..\src\rtkpos.c">
 						<Platform Name="Win32">
@@ -594,11 +594,6 @@
 						</Platform>
 					</DeployFile>
 					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="..\..\src\solution.c">
-						<Platform Name="Win32">
-							<RemoteDir>.\</RemoteDir>
-						</Platform>
-					</DeployFile>
-					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="..\..\src\geoid.c">
 						<Platform Name="Win32">
 							<RemoteDir>.\</RemoteDir>
 						</Platform>
@@ -612,6 +607,15 @@
 						<Platform Name="Win32">
 							<RemoteDir>.\</RemoteDir>
 						</Platform>
+					</DeployFile>
+					<DeployFile Class="DependencyModule" Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin64\borlndmm.dll">
+						<Platform Name="Win64"/>
+					</DeployFile>
+					<DeployFile Class="DependencyModule" Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c240.dll">
+						<Platform Name="Win32"/>
+					</DeployFile>
+					<DeployFile Class="DependencyModule" Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64240mt.dll">
+						<Platform Name="Win64"/>
 					</DeployFile>
 					<DeployFile Class="ProjectFile" Configuration="Release" LocalName="..\..\src\tides.c">
 						<Platform Name="Win32">
@@ -776,13 +780,13 @@
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="iPad_Launch2048">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
@@ -828,24 +832,24 @@
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="ProjectiOSResource">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="iPhone_Launch640">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
@@ -868,13 +872,13 @@
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="iPhone_Launch320">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
@@ -942,24 +946,24 @@
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="ProjectiOSInfoPList">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="iPad_Launch1024">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
@@ -1002,13 +1006,13 @@
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="iPad_Launch768">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
@@ -1058,13 +1062,13 @@
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="iPhone_Launch640x1136">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
@@ -1102,13 +1106,13 @@
 						</Platform>
 					</DeployClass>
 					<DeployClass Name="iPad_Launch1536">
-						<Platform Name="iOSDevice32">
+						<Platform Name="iOSSimulator">
 							<Operation>1</Operation>
 						</Platform>
 						<Platform Name="iOSDevice64">
 							<Operation>1</Operation>
 						</Platform>
-						<Platform Name="iOSSimulator">
+						<Platform Name="iOSDevice32">
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
@@ -1137,14 +1141,14 @@
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
-					<ProjectRoot Name="$(PROJECTNAME).app" Platform="OSX32"/>
+					<ProjectRoot Name="$(PROJECTNAME).app" Platform="iOSDevice32"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Android"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 					<ProjectRoot Name="$(PROJECTNAME).app" Platform="iOSDevice64"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Linux64"/>
+					<ProjectRoot Name="$(PROJECTNAME).app" Platform="OSX32"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win64"/>
 					<ProjectRoot Name="$(PROJECTNAME).app" Platform="iOSSimulator"/>
-					<ProjectRoot Name="$(PROJECTNAME).app" Platform="iOSDevice32"/>
 				</Deployment>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
