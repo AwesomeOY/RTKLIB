@@ -190,7 +190,7 @@ void __fastcall TMainWindow::FormShow(TObject *Sender)
 // callback on form close ---------------------------------------------------
 void __fastcall TMainWindow::FormClose(TObject *Sender, TCloseAction &Action)
 {
-	SaveOpt();
+	//SaveOpt();
 }
 // set output file paths ----------------------------------------------------
 void __fastcall TMainWindow::SetOutFiles(AnsiString infile)
@@ -348,7 +348,7 @@ void __fastcall TMainWindow::BtnPlotClick(TObject *Sender)
 void __fastcall TMainWindow::BtnPostClick(TObject *Sender)
 {
 	AnsiString path2="..\\..\\..\\bin\\";
-	AnsiString cmd1=CmdPostExe,cmd2=path2+CmdPostExe,opts=" ";
+	AnsiString cmd1="JoytonPost.exe",cmd2=path2+"JoytonPost.exe"/*CmdPostExe*/,opts=" ";
 	
 	if (!OutFileEna1->Checked) return;
 	
@@ -364,7 +364,7 @@ void __fastcall TMainWindow::BtnPostClick(TObject *Sender)
 	if (TimeUnitF ->Checked) opts=opts+" -tu "+TimeUnit->Text;
 	
 	if (!ExecCmd(cmd1+opts)&&!ExecCmd(cmd2+opts)) {
-		Message->Caption="error : rtkpost execution";
+		Message->Caption="error : JoytonPost execution";
 	}
 }
 // callback on button-options -----------------------------------------------
@@ -385,41 +385,74 @@ void __fastcall TMainWindow::BtnAbortClick(TObject *Sender)
 // callback on button-convert -----------------------------------------------
 void __fastcall TMainWindow::BtnConvertClick(TObject *Sender)
 {
+	char* infile;
+	char* p;
+	AnsiString InFile_Text=InFile->Text;
+	char rover_enable = 0;
+	char file_valid = 0;
+
 	if(""==InFile->Text)
 	{
 		showmsg("Error: None Raw Data File!");
 		return;
 	}
+	infile = InFile_Text.c_str();
+	if(p=strrchr(infile, '\\'))
+	{
+		if((*(p+1)=='R' || *(p+1)=='r') && *(p+2)=='-')
+		{
+			rover_enable = 1;
+			file_valid = 1;
+		}else if( (*(p+1)=='B'||*(p+1)=='b') && *(p+2)=='-')
+		{
+			rover_enable = 0;
+			file_valid = 1;
+		}else
+		{
+			file_valid = 0;
+		}
+		
+	}
+	if(!file_valid)
+	{
+		showmsg("File Error!");
+		return;
+	}
+
 	/* RTCM 3 convert nav data */
 	OutDirEna->Checked = 1;
-	OutFileEna1->Checked = 0;  /* no obs */
+	OutFileEna1->Checked = 1;  /* no obs */
 	OutFileEna2->Checked = 1;  /* RTCM3 to nav */
 	Format->ItemIndex = 2;     /* select file is RTCM 3 */
 	ConvertFile();
 
 	/* Novatel OEM6 data convert obs data */
-	OutDirEna->Checked = 1;
-	OutFileEna1->Checked = 1;  /* have obs */
-	OutFileEna2->Checked = 0;  /* no RTCM3 */
-	Format->ItemIndex = 3;     /* select file is Novatel */
-	ConvertFile();
+	//OutDirEna->Checked = 1;
+	//OutFileEna1->Checked = 1;  /* have obs */
+	//OutFileEna2->Checked = 0;  /* no RTCM3 */
+	//Format->ItemIndex = 3;     /* select file is Novatel */
+	//ConvertFile();
 
-    OutFileEna1->Checked = 1;  /* have obs */
-	OutFileEna2->Checked = 1;  /* no RTCM3 */
-
-    PROCESS_INFORMATION info;
-	STARTUPINFO si={0};
-	si.cb=sizeof(si);
-	AnsiString cmd = "";
-	cmd = cmd + ".\\rtklib_event_process.exe" + " " + InFile->Text +" " + OutFile1->Text;
-	if (!CreateProcess(NULL,cmd.c_str(),NULL,NULL,false,0,NULL,NULL,&si,&info))
+	//OutFileEna1->Checked = 1;  /* have obs */
+	//OutFileEna2->Checked = 1;  /* no RTCM3 */
+	if(rover_enable)
 	{
-		showmsg("Error: none event process app!");
-		return;
+		PROCESS_INFORMATION info;
+		STARTUPINFO si={0};
+		si.cb=sizeof(si);
+		AnsiString cmd = "";
+		cmd = cmd + ".\\rtklib_event_process.exe" + " " + InFile->Text +" " + OutFile1->Text;
+		if (!CreateProcess(NULL,cmd.c_str(),NULL,NULL,false,0,NULL,NULL,&si,&info))
+		{
+			showmsg("Error: none event process app!");
+			return;
+		}
+		showmsg(">>> Mark Event Process");
+		CloseHandle(info.hProcess);
+		CloseHandle(info.hThread);
+	}else{
+		showmsg("<<< Success! >>>");
 	}
-	showmsg(">>> Mark Event Process");
-	CloseHandle(info.hProcess);
-	CloseHandle(info.hThread);
 
 }
 // callback on button-exit --------------------------------------------------
@@ -1154,64 +1187,64 @@ void __fastcall TMainWindow::ConvertFile(void)
 // load options -------------------------------------------------------------
 void __fastcall TMainWindow::LoadOpt(void)
 {
-	TIniFile *ini=new TIniFile(IniFile);
+	//TIniFile *ini=new TIniFile(IniFile);
 	AnsiString mask="1111111111111111111111111111111111111111111111111111111";
 	
-	RnxVer				=ini->ReadInteger("opt","rnxver",	   0);
-	RnxFile				=ini->ReadInteger("opt","rnxfile",	   0);
-	RnxCode				=ini->ReadString ("opt","rnxcode","0000");
-	RunBy				=ini->ReadString ("opt","runby",	  "");
-	Marker				=ini->ReadString ("opt","marker",	  "");
-	MarkerNo			=ini->ReadString ("opt","markerno",   "");
-	MarkerType			=ini->ReadString ("opt","markertype", "");
-	Name[0]				=ini->ReadString ("opt","name0",	  "");
-	Name[1]				=ini->ReadString ("opt","name1",	  "");
-	Rec[0]				=ini->ReadString ("opt","rec0",		  "");
-	Rec[1]				=ini->ReadString ("opt","rec1",		  "");
-	Rec[2]				=ini->ReadString ("opt","rec2",		  "");
-	Ant[0]				=ini->ReadString ("opt","ant0",		  "");
-	Ant[1]				=ini->ReadString ("opt","ant1",		  "");
-	Ant[2]				=ini->ReadString ("opt","ant2",		  "");
-	AppPos[0]			=ini->ReadFloat  ("opt","apppos0",	 0.0);
-	AppPos[1]			=ini->ReadFloat  ("opt","apppos1",	 0.0);
-	AppPos[2]			=ini->ReadFloat  ("opt","apppos2",	 0.0);
-	AntDel[0]			=ini->ReadFloat  ("opt","antdel0",	 0.0);
-	AntDel[1]			=ini->ReadFloat  ("opt","antdel1",	 0.0);
-	AntDel[2]			=ini->ReadFloat  ("opt","antdel2",	 0.0);
-	Comment[0]			=ini->ReadString ("opt","comment0",   "");
-	Comment[1]			=ini->ReadString ("opt","comment1",   "");
-	RcvOption			=ini->ReadString ("opt","rcvoption",  "");
-	NavSys				=ini->ReadInteger("opt","navsys",	 0x3);
-	ObsType				=ini->ReadInteger("opt","obstype",	 0xF);
-	FreqType			=ini->ReadInteger("opt","freqtype",  0x3);
-	ExSats				=ini->ReadString ("opt","exsats",	  "");
-	TraceLevel			=ini->ReadInteger("opt","tracelevel",  0);
-	RnxTime.time		=ini->ReadInteger("opt","rnxtime",	   0);
-	CodeMask[0]			=ini->ReadString ("opt","codemask_1",mask);
-	CodeMask[1]			=ini->ReadString ("opt","codemask_2",mask);
-	CodeMask[2]			=ini->ReadString ("opt","codemask_3",mask);
-	CodeMask[3]			=ini->ReadString ("opt","codemask_4",mask);
-	CodeMask[4]			=ini->ReadString ("opt","codemask_5",mask);
-	CodeMask[5]			=ini->ReadString ("opt","codemask_6",mask);
-	CodeMask[6]			=ini->ReadString ("opt","codemask_7",mask);
-	AutoPos				=ini->ReadInteger("opt","autopos",	   0);
-	ScanObs				=ini->ReadInteger("opt","scanobs",	   0);
-	HalfCyc				=ini->ReadInteger("opt","halfcyc",	   0);
-	OutIono				=ini->ReadInteger("opt","outiono",	   0);
-	OutTime				=ini->ReadInteger("opt","outtime",	   0);
-	OutLeaps			=ini->ReadInteger("opt","outleaps",    0);
-	SepNav				=ini->ReadInteger("opt","sepnav",	   0);
+	RnxVer				=	6;		//ini->ReadInteger("opt","rnxver",	   0);
+	RnxFile				=	0; 		//ini->ReadInteger("opt","rnxfile",	   0);
+	RnxCode				=	0;		//ini->ReadString ("opt","rnxcode","0000");
+	RunBy				=	"";		//ini->ReadString ("opt","runby",	  "");
+	Marker				=	"";		//ini->ReadString ("opt","marker",	  "");
+	MarkerNo			=	"";		//ini->ReadString ("opt","markerno",   "");
+	MarkerType			=	"";		//ini->ReadString ("opt","markertype", "");
+	Name[0]				=	"";		//ini->ReadString ("opt","name0",	  "");
+	Name[1]				=	"";		//ini->ReadString ("opt","name1",	  "");
+	Rec[0]				=	"";		//ini->ReadString ("opt","rec0",		  "");
+	Rec[1]				=	"";		//ini->ReadString ("opt","rec1",		  "");
+	Rec[2]				=	"";		//ini->ReadString ("opt","rec2",		  "");
+	Ant[0]				=	"";		//ini->ReadString ("opt","ant0",		  "");
+	Ant[1]				=	"";		//ini->ReadString ("opt","ant1",		  "");
+	Ant[2]				=	"";		//ini->ReadString ("opt","ant2",		  "");
+	AppPos[0]			=	0.0;	//ini->ReadFloat  ("opt","apppos0",	 0.0);
+	AppPos[1]			=	0.0;	//ini->ReadFloat  ("opt","apppos1",	 0.0);
+	AppPos[2]			=	0.0;	//ini->ReadFloat  ("opt","apppos2",	 0.0);
+	AntDel[0]			=	0.0;	//ini->ReadFloat  ("opt","antdel0",	 0.0);
+	AntDel[1]			=	0.0;	//ini->ReadFloat  ("opt","antdel1",	 0.0);
+	AntDel[2]			=	0.0;	//ini->ReadFloat  ("opt","antdel2",	 0.0);
+	Comment[0]			=	"";		//ini->ReadString ("opt","comment0",   "");
+	Comment[1]			=	"";		//ini->ReadString ("opt","comment1",   "");
+	RcvOption			=	"";		//ini->ReadString ("opt","rcvoption",  "");
+	NavSys				=	37;		//ini->ReadInteger("opt","navsys",	 0x3);
+	ObsType				=	15;		//ini->ReadInteger("opt","obstype",	 0xF);
+	FreqType			=	127;	//ini->ReadInteger("opt","freqtype",  0x3);
+	ExSats				=	"";		//ini->ReadString ("opt","exsats",	  "");
+	TraceLevel			=	0;		//ini->ReadInteger("opt","tracelevel",  0);
+	RnxTime.time		=   0;		//ini->ReadInteger("opt","rnxtime",	   0);
+	CodeMask[0]			=	"1000000000000000000100000000000000000000000000000000000"; 	//ini->ReadString ("opt","codemask_1",mask);
+	CodeMask[1]			=	"1000000000000000001000000000000000000000000000000000000"; 	//ini->ReadString ("opt","codemask_2",mask);
+	CodeMask[2]			=	"0000000000000000000000000000000000000000000000000000000"; 	//ini->ReadString ("opt","codemask_3",mask);
+	CodeMask[3]			=	"0000000000000000000000000000000000000000000000000000000";	//ini->ReadString ("opt","codemask_4",mask);
+	CodeMask[4]			=	"0000000000000000000000000000000000000000000000000000000";	//ini->ReadString ("opt","codemask_5",mask);
+	CodeMask[5]			=	"0000000000000000000000000010000000000000000000100000000";  //ini->ReadString ("opt","codemask_6",mask);
+	CodeMask[6]			=	"0000000000000000000000000000000000000000000000000000000";	//ini->ReadString ("opt","codemask_7",mask);
+	AutoPos				=	0;	//ini->ReadInteger("opt","autopos",	   0);
+	ScanObs				=	0;	//ini->ReadInteger("opt","scanobs",	   0);
+	HalfCyc				=	0;	//ini->ReadInteger("opt","halfcyc",	   0);
+	OutIono				=	0;	//ini->ReadInteger("opt","outiono",	   0);
+	OutTime				=	0;	//ini->ReadInteger("opt","outtime",	   0);
+	OutLeaps			=	0;	//ini->ReadInteger("opt","outleaps",    0);
+	SepNav				=	0;	//ini->ReadInteger("opt","sepnav",	   0);
 	
-	TimeStartF ->Checked=ini->ReadInteger("set","timestartf",  0);
-	TimeEndF   ->Checked=ini->ReadInteger("set","timeendf",    0);
-	TimeIntF   ->Checked=ini->ReadInteger("set","timeintf",    0);
-	TimeY1	   ->Text	=ini->ReadString ("set","timey1",	  "2000/01/01");
-	TimeH1	   ->Text	=ini->ReadString ("set","timeh1",	  "00:00:00"  );
-	TimeY2	   ->Text	=ini->ReadString ("set","timey2",	  "2000/01/01");
-	TimeH2	   ->Text	=ini->ReadString ("set","timeh2",	  "00:00:00"  );
-	TimeInt    ->Text	=ini->ReadString ("set","timeint",	 "1");
-	TimeUnitF  ->Checked=ini->ReadInteger("set","timeunitf",   0);
-	TimeUnit   ->Text	=ini->ReadString ("set","timeunit", "24");
+	TimeStartF ->Checked=	0;	//ini->ReadInteger("set","timestartf",  0);
+	TimeEndF   ->Checked=	0;	//ini->ReadInteger("set","timeendf",    0);
+	TimeIntF   ->Checked=	0;	//ini->ReadInteger("set","timeintf",    0);
+	TimeY1	   ->Text	=	"2019/01/01";	//ini->ReadString ("set","timey1",	  "2000/01/01");
+	TimeH1	   ->Text	=	"00:00:00"; 	//ini->ReadString ("set","timeh1",	  "00:00:00"  );
+	TimeY2	   ->Text	=	"2019/01/01";	//ini->ReadString ("set","timey2",	  "2000/01/01");
+	TimeH2	   ->Text	=	"00:00:00";		//ini->ReadString ("set","timeh2",	  "00:00:00"  );
+	TimeInt    ->Text	=	"1";			//ini->ReadString ("set","timeint",	 "1");
+	TimeUnitF  ->Checked=	0;				//ini->ReadInteger("set","timeunitf",   0);
+	TimeUnit   ->Text	=	24;				//ini->ReadString ("set","timeunit", "24");
 	/*
 	InFile	   ->Text	=ini->ReadString ("set","infile",	  "");
 	OutDir	   ->Text	=ini->ReadString ("set","outdir",	  "");
@@ -1237,18 +1270,18 @@ void __fastcall TMainWindow::LoadOpt(void)
 	Format	 ->ItemIndex=ini->ReadInteger("set","format",	   0);
 	*/
 	
-	InFile->Items=ReadList(ini,"hist","inputfile");
+	//InFile->Items=ReadList(ini,"hist","inputfile");
 	
-	TTextViewer::Color1=(TColor)ini->ReadInteger("viewer","color1",(int)clBlack);
-	TTextViewer::Color2=(TColor)ini->ReadInteger("viewer","color2",(int)clWhite);
+	TTextViewer::Color1=	(TColor)0;			//(TColor)ini->ReadInteger("viewer","color1",(int)clBlack);
+	TTextViewer::Color2=	(TColor)16777215;	//(TColor)ini->ReadInteger("viewer","color2",(int)clWhite);
 	TTextViewer::FontD=new TFont;
-	TTextViewer::FontD->Name=ini->ReadString ("viewer","fontname","Courier New");
-	TTextViewer::FontD->Size=ini->ReadInteger("viewer","fontsize",9);
+	TTextViewer::FontD->Name=	"Courier New";	//ini->ReadString ("viewer","fontname","Courier New");
+	TTextViewer::FontD->Size=	9;				//ini->ReadInteger("viewer","fontsize",9);
 	
-	CmdPostExe		   =ini->ReadString  ("set","cmdpostexe","rtkpost_mkl");
-	Width			   =ini->ReadInteger ("window","width", 488);
+	CmdPostExe		   =	"rtkpost_mkl";		//ini->ReadString  ("set","cmdpostexe","rtkpost_mkl");
+	Width			   =	488;				//ini->ReadInteger ("window","width", 488);
 	
-	delete ini;
+	//delete ini;
 	
 	UpdateEnable();
 }

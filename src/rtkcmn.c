@@ -1334,9 +1334,9 @@ extern void time2epoch(gtime_t t, double *ep)
     int days,sec,mon,day;
     
     /* leap year if year%4==0 in 1901-2099 */
-    days=(int)(t.time/86400);
-    sec=(int)(t.time-(time_t)days*86400);
-    for (day=days%1461,mon=0;mon<48;mon++) {
+    days=(int)(t.time/86400);  /* day count */
+    sec=(int)(t.time-(time_t)days*86400); /* secount cout */
+    for (day=days%1461,mon=0;mon<48;mon++) { /* per 4 year */
         if (day>=mday[mon]) day-=mday[mon]; else break;
     }
     ep[0]=1970+days/1461*4+mon/12; ep[1]=mon%12+1; ep[2]=day+1;

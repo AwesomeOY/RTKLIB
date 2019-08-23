@@ -1298,7 +1298,7 @@ static int decode_utcb(raw_t *raw)
 static int decode_oem4(raw_t *raw)
 {
     double tow;
-    int msg,week,type=U2(raw->buff+4);
+    int msg,week,tweek,type=U2(raw->buff+4);
     
     trace(3,"decode_oem4: type=%3d len=%d\n",type,raw->len);
     
@@ -1311,9 +1311,11 @@ static int decode_oem4(raw_t *raw)
     if (!(week=U2(raw->buff+14))) {
         return -1;
     }
+    tweek = week;
     week=adjgpsweek(week);
-    tow =U4(raw->buff+16)*0.001;
+    tow =U4(raw->buff+16)*0.001; /* second */
     raw->time=gpst2time(week,tow);
+    trace(1,"decode_oem4: week=%3d sec=%.3f\n",week,tow);
     
     if (raw->outtype) {
         sprintf(raw->msgtype,"OEM4 %4d (%4d): msg=%d %s",type,raw->len,msg,
