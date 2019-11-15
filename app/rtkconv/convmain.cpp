@@ -1049,7 +1049,8 @@ void __fastcall TMainWindow::ConvertFile(void)
 			{
 				date[4] = date[5] = 0.0;
 				rnxopt.trtcm = epoch2time(date);
-				showmsg("%.0f,%.0f,%.0f,%.0f", date[0],date[1],date[2],date[3]);
+				showmsg("Time£º%.0f,%.0f,%.0f,%.0f %d", date[0],date[1],date[2],date[3],rnxopt.trtcm.time);
+				trace(1,"rnxopt.trtcm: %d\r\n", rnxopt.trtcm.time);
 			}
 		}else
 		{

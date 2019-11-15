@@ -109,7 +109,7 @@ static double str2dbl(AnsiString str)
 __fastcall TMainForm::TMainForm(TComponent* Owner)
     : TForm(Owner)
 {
-    char file[1024]="rtkpost.exe",*p;
+    char file[1024]="JoytonPost.exe",*p;
     int i;
     
     ::GetModuleFileName(NULL,file,sizeof(file));
@@ -770,15 +770,15 @@ int __fastcall TMainForm::ExecProc(void)
     // set input/output files
     for (i=0;i<6;i++) infile[i]=infile_[i];
     
-    strcpy(infile[n++],InputFile1_Text.c_str());
+    strcpy(infile[n++],InputFile1_Text.c_str());   /* rover file obs n=0*/
     
-    if (PMODE_DGPS<=prcopt.mode&&prcopt.mode<=PMODE_FIXED) {
+    if (PMODE_DGPS<=prcopt.mode&&prcopt.mode<=PMODE_FIXED) {  /* base file obs  n=1*/
         strcpy(infile[n++],InputFile2_Text.c_str());
     }
     if (InputFile3->Text!="") {
-        strcpy(infile[n++],InputFile3_Text.c_str());
+        strcpy(infile[n++],InputFile3_Text.c_str());   /* nav file n=2 */
     }
-    else if (!ObsToNav(InputFile1_Text.c_str(),infile[n++])) {
+    else if (!ObsToNav(InputFile1_Text.c_str(),infile[n++])) {  /* n=3 */
         showmsg((char *)"error: no navigation data");
         return 0;
     }

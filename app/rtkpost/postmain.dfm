@@ -2,7 +2,7 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
-  Caption = 'JoytonPOST'
+  Caption = 'JoytonPost'
   ClientHeight = 346
   ClientWidth = 472
   Color = clWhite

@@ -265,17 +265,23 @@ static strfile_t *gen_strfile(int format, const char *opt, gtime_t time)
     
     trace(3,"init_strfile:\n");
     
-    if (!(str=(strfile_t *)calloc(sizeof(strfile_t),1))) return NULL;
+    if (!(str=(strfile_t *)calloc(sizeof(strfile_t),1)))
+    {
+        showmsg("strfile_t calloc error");
+        return NULL;
+    } 
     
     if (format==STRFMT_RTCM2||format==STRFMT_RTCM3) {
         if (!init_rtcm(&str->rtcm)) {
             showmsg("init rtcm error");
             return 0;
         }
-        str->rtcm.time=time;
-        str->obs=&str->rtcm.obs;
+		str->rtcm.time=time;
+		str->obs=&str->rtcm.obs;
         str->nav=&str->rtcm.nav; 
         strcpy(str->rtcm.opt,opt);
+		showmsg("init the rtcm time %d", str->rtcm.time.time);
+		trace(1, "init the rtcm time %d\r\n", str->rtcm.time.time);
     }
     else if (format<=MAXRCVFMT) {
         if (!init_raw(&str->raw,format)) {
@@ -362,6 +368,8 @@ static int open_strfile(strfile_t *str, const char *file, stream_t *stream)
             showmsg("rtcm open error: %s",file);
             return 0;
         }
+        showmsg("rtcm open file: %s",file);
+        trace(1,"rtcm open file: %s",file);
     }
     else if (str->format<=MAXRCVFMT) {
         if ((!stream->port) && !(str->fp=fopen(file,"rb"))) {
@@ -1192,7 +1200,7 @@ static int showstat(int sess, gtime_t ts, gtime_t te, int *n)
     return showmsg(msg);
 }
 /* rinex converter for single-session ----------------------------------------*/
-static int convrnx_s(int sess, int format, rnxopt_t *opt, const char *file,
+static int  convrnx_s(int sess, int format, rnxopt_t *opt, const char *file,
                      char **ofile, int *intflg, stream_t *stream)
 {
     FILE *ofp[NOUTFILE]={NULL};
@@ -1395,6 +1403,7 @@ extern int convrnx(int format, rnxopt_t *opt, const char *file,
         /* single-session */
         opt_.tstart=opt_.tend=t0;
         stat=convrnx_s(0,format,&opt_,file,ofile,intflg,stream);
+        trace(1," single-session  ");
     }
     else if (timediff(opt->ts,opt->te)<=0.0) {
         
@@ -1413,6 +1422,7 @@ extern int convrnx(int format, rnxopt_t *opt, const char *file,
             opt_.tstart=opt_.tend=t0;
             if ((stat=convrnx_s(i+1,format,&opt_,file,ofile,intflg,stream))<0) break;
         }
+        trace(1," multiple-session  ");
     }
     else {
         showmsg("no period");
