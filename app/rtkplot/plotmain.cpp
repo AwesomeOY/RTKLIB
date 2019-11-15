@@ -222,7 +222,7 @@ void __fastcall TPlot::FormShow(TObject *Sender)
         if (!strcmp(argv[i],"-i")&&i+1<argc) IniFile=argv[++i];
     }
     LoadOpt();
-    
+
     for (i=1;i<argc;i++) {
         if      (!strcmp(argv[i],"-r" )) OpenRaw=1;
         else if (!strcmp(argv[i],"-p" )&&i+1<argc) path1=argv[++i];
@@ -294,7 +294,27 @@ void __fastcall TPlot::FormActivate(TObject *Sender)
     
     if (OpenFiles->Count>0) {
         if (CheckObs(OpenFiles->Strings[0])||OpenRaw) ReadObs(OpenFiles);
-        else ReadSol(OpenFiles,0);
+        else {
+            char file[1024];
+            char* p;
+            char* pp = "_mark.pos";
+            int i = 0;
+            TStrings* ss = new TStringList;
+            AnsiString posf = OpenFiles->Strings[0];   // get the pos file
+            strcpy(file,U2A(posf).c_str());
+            p = strstr(file, ".pos");
+            if(p!=NULL){
+                *p = '\0';
+                *strcat(file, (const char *)pp);
+                BtnSol2->Down = true;
+                ss->Add(file);
+                ReadSol(ss,0);
+            }else { BtnSol2->Down = false; }
+            delete ss;
+
+            BtnSol1->Down = true;
+            ReadSol(OpenFiles,1);
+        }
     }
 }
 // callback on form-resize --------------------------------------------------
